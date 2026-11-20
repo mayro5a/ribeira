@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (formatação, compilação, testes unitários e de integração)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ribeira-backend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      # `verify` executa Spotless (check), compilação com -Werror, testes
+      # unitários (Surefire), testes de integração com PostgreSQL via
+      # Testcontainers (Failsafe) e as migrações Flyway em base limpa.
+      - run: ./mvnw -B verify
+
+  frontend:
+    name: Frontend (formatação, lint, tipos, testes e build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ribeira-frontend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: ribeira-frontend/package-lock.json
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  dependencies:
+    name: Dependências vulneráveis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      # Política: vulnerabilidades altas ou críticas em dependências de
+      # produção bloqueiam o merge; as demais são tratadas em issue.
+      - name: npm audit (produção)
+        working-directory: ribeira-frontend
+        run: npm audit --omit=dev --audit-level=high
+      # Relatório completo (inclui Maven); informativo para não bloquear por
+      # vulnerabilidades baixas sem correção disponível. Revisar a cada PR.
+      - name: OSV-Scanner (Maven e npm)
+        continue-on-error: true
+        uses: google/osv-scanner-action/osv-scanner-action@v2.7.1
+        with:
+          scan-args: |-
+            --recursive
+            ./
