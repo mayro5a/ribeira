@@ -1,0 +1,31 @@
+# OS / editores
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+
+# Ambiente
+.env
+.env.*
+!.env.example
+
+# Backend (Maven)
+ribeira-backend/target/
+ribeira-backend/.mvn/wrapper/maven-wrapper.jar
+
+# Frontend (Node / Next.js)
+node_modules/
+ribeira-frontend/.next/
+ribeira-frontend/out/
+ribeira-frontend/coverage/
+ribeira-frontend/test-results/
+ribeira-frontend/playwright-report/
+ribeira-frontend/public/sw.js
+ribeira-frontend/next-env.d.ts
+*.tsbuildinfo
+npm-debug.log*
+
+# Logs
+*.log
