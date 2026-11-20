@@ -2,6 +2,7 @@ package com.ribeira.community.application;
 
 import com.ribeira.community.domain.CommunityRepository;
 import com.ribeira.shared.security.CommunityDirectory;
+import com.ribeira.shared.security.CommunityDirectory.CommunityRef;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,5 +29,13 @@ class CommunityDirectoryAdapter implements CommunityDirectory {
   @Transactional(readOnly = true)
   public List<UUID> communityIdsOf(UUID organizationId) {
     return communities.findIdsByOrganizationId(organizationId);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<CommunityRef> activeCommunities() {
+    return communities.findByActiveTrue().stream()
+        .map(c -> new CommunityRef(c.getOrganizationId(), c.getId()))
+        .toList();
   }
 }

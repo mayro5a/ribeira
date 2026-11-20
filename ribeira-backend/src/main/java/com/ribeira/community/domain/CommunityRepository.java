@@ -17,6 +17,8 @@ public interface CommunityRepository extends JpaRepository<Community, UUID> {
   @Query("select c.organizationId from Community c where c.id = :id")
   Optional<UUID> findOrganizationIdById(UUID id);
 
+  List<Community> findByActiveTrue();
+
   boolean existsByOrganizationIdAndNameIgnoreCaseAndIdNot(
       UUID organizationId, String name, UUID id);
 }

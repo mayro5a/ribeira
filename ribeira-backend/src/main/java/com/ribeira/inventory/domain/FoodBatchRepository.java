@@ -34,6 +34,11 @@ public interface FoodBatchRepository extends JpaRepository<FoodBatch, UUID> {
       """)
   Page<FoodBatch> search(UUID communityId, UUID foodId, BatchStatus status, Pageable pageable);
 
+  @Query(
+      "select distinct b.foodId from FoodBatch b"
+          + " where b.storageLocationId = :locationId and b.status <> 'DEPLETED'")
+  List<UUID> findFoodIdsStoredAt(UUID locationId);
+
   List<FoodBatch> findByCommunityIdAndFoodIdAndStatus(
       UUID communityId, UUID foodId, BatchStatus status);
 

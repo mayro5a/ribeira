@@ -76,6 +76,12 @@ public class InventoryReadModel {
     return batches.findExpiringUntil(communityIds, limit).stream().map(BatchView::of).toList();
   }
 
+  /** Foods currently stored at a location (used to apply category storage conditions). */
+  @Transactional(readOnly = true)
+  public List<UUID> foodIdsStoredAt(UUID locationId) {
+    return batches.findFoodIdsStoredAt(locationId);
+  }
+
   /** Foods whose available stock is below the configured minimum (only where one is set). */
   @Transactional(readOnly = true)
   public List<LowStockView> lowStock(UUID organizationId, Collection<UUID> communityIds) {
