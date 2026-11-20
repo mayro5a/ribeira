@@ -82,6 +82,9 @@ ribeira:
     admin-email: ${RIBEIRA_BOOTSTRAP_ADMIN_EMAIL:}
     admin-name: ${RIBEIRA_BOOTSTRAP_ADMIN_NAME:}
     admin-password: ${RIBEIRA_BOOTSTRAP_ADMIN_PASSWORD:}
+  demo:
+    enabled: ${RIBEIRA_DEMO_DATA_ENABLED:false}
+    password: ${RIBEIRA_DEMO_PASSWORD:}
 
 springdoc:
   api-docs:
