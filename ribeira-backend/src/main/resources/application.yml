@@ -20,8 +20,14 @@ spring:
         jdbc:
           time_zone: UTC
           batch_size: 50
-        order_inserts: true
-        order_updates: true
+        # Sem order_inserts: entidades de módulos diferentes se referenciam por UUID, sem
+        # associação JPA, então a ordem de persistência precisa ser preservada.
+  data:
+    web:
+      pageable:
+        default-page-size: 50
+        max-page-size: 200
+        serialization-mode: via_dto
   flyway:
     enabled: true
     locations: classpath:db/migration
