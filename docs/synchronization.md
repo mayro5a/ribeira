@@ -214,7 +214,26 @@ O registro original, o motivo, o histórico de tentativas
   (incluindo famílias) e mantém apenas a fila de operações para exportação
   controlada.
 
-## 8. Limites conhecidos do MVP
+## 8. Notas de implementação
+
+- Operação para comunidade inexistente ou de outra organização recebe
+  `REJECTED` / `COMMUNITY_NOT_FOUND` e **não** é gravada no servidor (não pode
+  referenciar outro tenant); ela permanece no aparelho como `FAILED`.
+- `RETRY` reexecuta a operação sob a autoridade de quem revisa: as permissões
+  e o responsável registrados são os do revisor; o autor original continua em
+  `sync_operations.user_id` e na auditoria.
+- Aparelho compartilhado: só as operações do usuário autenticado são enviadas.
+  Ao trocar de usuário, os snapshots locais são apagados e o cursor volta a zero.
+- Erros inesperados (5xx) durante o push falham a requisição inteira; o aparelho
+  reenvia com backoff e as já aplicadas retornam `DUPLICATE`.
+- O formulário de doação cria um lote por item; o contrato já aceita vários
+  lotes por item para uma versão futura da interface.
+
+## 9. Limites conhecidos do MVP
+
+- Se as permissões de um usuário aumentarem, alterações anteriores ao cursor
+  não são reenviadas; um novo login com outro usuário ou a limpeza dos dados
+  locais força a carga completa. Evolução prevista: cursor por escopo de permissão.
 
 - O feed de alterações não é compactado; a carga inicial percorre todo o
   histórico da organização. Adequado ao volume esperado; compactação e
