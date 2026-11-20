@@ -6,9 +6,15 @@ import { Button } from "@/components/ui/Button";
 import { Notice } from "@/components/ui/Feedback";
 import { TextField } from "@/components/ui/Field";
 import { useApp } from "@/features/app/AppProvider";
+import { useQueryParam } from "@/features/app/useQueryParam";
 import { hashPin, validatePin, verifyPin } from "@/lib/auth/pin";
 
 const MAX_FAILED_ATTEMPTS = 5;
+
+/** Aceita somente caminhos internos, evitando redirecionamento para outro site. */
+function safeReturnPath(path: string | null | undefined): string {
+  return path && path.startsWith("/") && !path.startsWith("//") ? path : "/inicio/";
+}
 
 /** Desbloqueio local por PIN; no primeiro acesso, cria o PIN. */
 export default function UnlockPage() {
@@ -20,6 +26,7 @@ export default function UnlockPage() {
   const [failures, setFailures] = useState(0);
   const [busy, setBusy] = useState(false);
   const creating = session ? !session.pin : false;
+  const returnTo = useQueryParam("voltar");
 
   useEffect(() => {
     if (session === null) router.replace("/entrar/");
@@ -56,7 +63,7 @@ export default function UnlockPage() {
         return;
       }
       unlock();
-      router.replace("/inicio/");
+      router.replace(safeReturnPath(returnTo));
     } finally {
       setBusy(false);
     }

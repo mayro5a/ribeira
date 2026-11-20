@@ -82,7 +82,7 @@ function Inventory() {
                     </span>
                   </span>
                   <span className="text-right">
-                    <span className="block text-xl font-bold">
+                    <span className="block whitespace-nowrap text-xl font-bold">
                       {formatQuantity(item.available, item.unit)}
                     </span>
                     {item.hasProvisional ? <Badge tone="warning">provisório</Badge> : null}

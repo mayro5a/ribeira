@@ -27,7 +27,9 @@ export function Protected({ children }: { children: ReactNode }) {
     if (session === null || expired) {
       router.replace("/entrar/");
     } else if (session && !unlocked) {
-      router.replace("/desbloquear/");
+      // Volta para a mesma tela depois do desbloqueio.
+      const back = window.location.pathname + window.location.search;
+      router.replace(`/desbloquear/?voltar=${encodeURIComponent(back)}`);
     }
   }, [session, unlocked, expired, router]);
 
