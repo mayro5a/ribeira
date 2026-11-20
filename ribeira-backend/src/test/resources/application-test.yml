@@ -1,0 +1,10 @@
+# Valores exclusivos de teste; não são segredos reais.
+ribeira:
+  security:
+    jwt-secret: test-only-secret-not-used-anywhere-else-0123456789
+    cookie-secure: false
+    cors-allowed-origins: http://localhost:3000
+    login-max-failures: 3
+logging:
+  level:
+    com.ribeira: WARN
