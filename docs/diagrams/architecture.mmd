@@ -1,0 +1,29 @@
+flowchart TB
+  subgraph Aparelho["Aparelho Android (PWA)"]
+    UI["Telas React (Next.js export estático)"]
+    UC["Casos de uso locais (features/*)"]
+    PROJ["Projeção local de saldos"]
+    Q["Fila de operações"]
+    IDB[("IndexedDB / Dexie")]
+    ENG["Motor de sincronização"]
+    SW["Service Worker (precache versionado)"]
+    UI --> UC --> IDB
+    UC --> Q --> IDB
+    UI --> PROJ --> IDB
+    ENG --> IDB
+    SW -. arquivos do app .-> UI
+  end
+  subgraph Servidor["Servidor"]
+    NGINX["nginx (estáticos + proxy /api)"]
+    subgraph Backend["Spring Boot — monólito modular"]
+      API["api: controllers + DTOs"]
+      APP["application: casos de uso, transações, autorização"]
+      DOM["domain: entidades, invariantes, repositórios"]
+      SYNC["sync: push / pull / idempotência / conflitos"]
+      API --> APP --> DOM
+      SYNC --> APP
+    end
+    PG[("PostgreSQL + Flyway")]
+    DOM --> PG
+  end
+  ENG -- "HTTPS push/pull" --> NGINX --> API

@@ -1,0 +1,90 @@
+erDiagram
+  ORGANIZATIONS ||--o{ COMMUNITIES : administra
+  ORGANIZATIONS ||--o{ USERS : possui
+  ORGANIZATIONS ||--o{ ROLES : "define (opcional)"
+  ROLES ||--o{ ROLE_PERMISSIONS : concede
+  USERS ||--o{ USER_ROLES : "papel organizacional"
+  ROLES ||--o{ USER_ROLES : ""
+  USERS ||--o{ COMMUNITY_USERS : "atua em"
+  COMMUNITIES ||--o{ COMMUNITY_USERS : ""
+  ROLES ||--o{ COMMUNITY_USERS : ""
+  USERS ||--o{ REFRESH_TOKENS : ""
+  USERS ||--o{ DEVICES : registra
+  COMMUNITIES |o--o| DEVICES : "aparelho principal"
+
+  COMMUNITIES ||--o{ FAMILIES : atende
+  ORGANIZATIONS ||--o{ DONORS : ""
+  ORGANIZATIONS ||--o{ FOODS : catalogo
+  COMMUNITIES ||--o{ STORAGE_LOCATIONS : ""
+  COMMUNITIES ||--o{ DONATIONS : recebe
+  DONORS |o--o{ DONATIONS : origem
+  DONATIONS ||--|{ DONATION_ITEMS : contem
+  FOODS ||--o{ DONATION_ITEMS : ""
+  DONATION_ITEMS |o--o{ FOOD_BATCHES : gera
+  FOODS ||--o{ FOOD_BATCHES : ""
+  STORAGE_LOCATIONS |o--o{ FOOD_BATCHES : armazena
+  FOOD_BATCHES ||--|{ STOCK_MOVEMENTS : "livro-razão"
+  COMMUNITIES ||--o{ STOCK_MINIMUMS : ""
+  FOODS ||--o{ STOCK_MINIMUMS : ""
+
+  COMMUNITIES ||--o{ DISTRIBUTIONS : realiza
+  DISTRIBUTIONS ||--|{ DISTRIBUTION_ITEMS : contem
+  FOOD_BATCHES ||--o{ DISTRIBUTION_ITEMS : ""
+  DISTRIBUTIONS ||--|{ DISTRIBUTION_FAMILIES : atende
+  FAMILIES ||--o{ DISTRIBUTION_FAMILIES : ""
+  FOOD_BATCHES ||--o{ FOOD_LOSSES : sofre
+
+  STORAGE_LOCATIONS ||--o{ ENVIRONMENTAL_READINGS : ""
+  ORGANIZATIONS ||--o{ STORAGE_CONDITIONS : configura
+  COMMUNITIES ||--o{ ALERTS : ""
+
+  ORGANIZATIONS ||--|| SYNC_COUNTERS : ""
+  ORGANIZATIONS ||--o{ CHANGE_LOG : ""
+  DEVICES ||--o{ SYNC_OPERATIONS : envia
+  DEVICES ||--o| SYNC_CHECKPOINTS : ""
+  SYNC_OPERATIONS ||--o| SYNC_CONFLICTS : ""
+  SYNC_CONFLICTS ||--o{ SYNC_CONFLICT_EVENTS : historico
+  ORGANIZATIONS ||--o{ AUDIT_LOGS : ""
+
+  FOOD_BATCHES {
+    uuid id PK
+    uuid community_id FK
+    uuid food_id FK
+    uuid storage_location_id FK "opcional"
+    uuid donation_item_id FK "ou origin_description"
+    numeric initial_quantity "14,3"
+    numeric available_quantity "CHECK >= 0"
+    varchar unit
+    varchar expiration_status "KNOWN | NOT_APPLICABLE | UNKNOWN"
+    date expiration_date "obrigatória se KNOWN"
+    varchar status "AVAILABLE | BLOCKED | DEPLETED"
+    bigint version
+  }
+  STOCK_MOVEMENTS {
+    uuid id PK
+    uuid batch_id FK
+    varchar type "ENTRY | DISTRIBUTION | LOSS | ADJUSTMENT"
+    numeric quantity_delta "sinal conforme o tipo"
+    numeric balance_after
+    varchar source_type
+    uuid source_id
+    text justification "obrigatória em ADJUSTMENT"
+    uuid performed_by FK
+    timestamptz occurred_at
+  }
+  SYNC_OPERATIONS {
+    uuid operation_id PK "idempotência"
+    uuid device_id FK
+    varchar operation_type
+    jsonb payload
+    char payload_hash "SHA-256"
+    varchar status "APPLIED | REJECTED | CONFLICT | DISCARDED"
+    bigint server_seq
+  }
+  CHANGE_LOG {
+    uuid organization_id PK
+    bigint seq PK
+    uuid community_id
+    varchar entity_type
+    uuid entity_id
+  }

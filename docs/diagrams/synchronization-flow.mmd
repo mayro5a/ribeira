@@ -1,0 +1,29 @@
+sequenceDiagram
+  participant ENG as Motor de sync (aparelho)
+  participant API as Servidor
+  participant DB as PostgreSQL
+
+  ENG->>ENG: SENDING presos → PENDING (recuperação de crash)
+  loop lotes de até 25 operações em ordem de criação
+    ENG->>API: POST /sync/push
+    alt operationId já registrado
+      API->>DB: compara hash do payload
+      API-->>ENG: DUPLICATE (ou estado atual) | REJECTED OPERATION_ID_REUSED
+    else nova operação
+      API->>DB: transação própria: regras + movimentos + sync_operations
+      alt sucesso
+        API-->>ENG: APPLIED + serverSeq
+      else saldo insuficiente / referência ausente
+        API->>DB: nova transação: sync_operations CONFLICT + sync_conflicts
+        API-->>ENG: CONFLICT + conflictId
+      else payload inválido / sem permissão
+        API->>DB: sync_operations REJECTED + sync_conflicts
+        API-->>ENG: REJECTED
+      end
+    end
+  end
+  loop enquanto hasMore
+    ENG->>API: GET /sync/pull?cursor=c
+    API-->>ENG: changes (seq > c, comunidades autorizadas), nextCursor
+    ENG->>ENG: transação IndexedDB: snapshots + cursor
+  end

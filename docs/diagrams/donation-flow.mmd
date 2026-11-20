@@ -1,0 +1,23 @@
+sequenceDiagram
+  actor R as Responsável pelo estoque
+  participant UI as PWA
+  participant IDB as IndexedDB
+  participant ENG as Motor de sync
+  participant API as /api/v1/sync/push
+  participant DB as PostgreSQL
+
+  R->>UI: Preenche doação (itens e lotes)
+  UI->>IDB: transação: operação DONATION_RECEIVE (PENDING)
+  UI-->>R: "Salvo no aparelho — aguardando sincronização"
+  Note over UI,IDB: Lotes aparecem como provisórios na projeção local
+  ENG->>IDB: seleciona PENDING → SENDING
+  ENG->>API: push [operação]
+  API->>DB: BEGIN; valida aparelho, permissão e payload
+  API->>DB: INSERT donation, items, batches, movimentos ENTRY
+  API->>DB: INSERT sync_operations (operation_id UNIQUE) + change_log
+  API->>DB: COMMIT
+  API-->>ENG: APPLIED, serverSeq
+  ENG->>IDB: SYNCED (serverSeq)
+  ENG->>API: pull?cursor=…
+  API-->>ENG: snapshots (doação, lotes, movimentos)
+  ENG->>IDB: aplica snapshots + cursor na mesma transação
