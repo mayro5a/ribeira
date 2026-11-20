@@ -24,4 +24,28 @@ public interface DonationRepository extends JpaRepository<Donation, UUID> {
       "select distinct d from Donation d left join fetch d.items"
           + " where d.organizationId = :organizationId and d.id in :ids")
   List<Donation> findWithItems(UUID organizationId, Collection<UUID> ids);
+
+  @Query(
+      """
+      select count(d) from Donation d
+      where d.communityId in :communityIds and d.receivedAt >= :from and d.receivedAt < :to
+      """)
+  long countIn(Collection<UUID> communityIds, Instant from, Instant to);
+
+  @Query(
+      """
+      select i.foodId as foodId, i.unit as unit, sum(i.quantity) as quantity
+      from DonationItem i join i.donation d
+      where d.communityId in :communityIds and d.receivedAt >= :from and d.receivedAt < :to
+      group by i.foodId, i.unit
+      """)
+  List<QuantityByFood> totalsByFood(Collection<UUID> communityIds, Instant from, Instant to);
+
+  interface QuantityByFood {
+    UUID getFoodId();
+
+    com.ribeira.shared.domain.UnitOfMeasure getUnit();
+
+    java.math.BigDecimal getQuantity();
+  }
 }

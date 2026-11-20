@@ -3,6 +3,7 @@ package com.ribeira.donation.application;
 import com.ribeira.donation.domain.Donation;
 import com.ribeira.donation.domain.DonationItem;
 import com.ribeira.donation.domain.DonationRepository;
+import com.ribeira.donation.domain.DonationRepository.QuantityByFood;
 import com.ribeira.donor.application.DonorService;
 import com.ribeira.inventory.application.InventoryViews.BatchView;
 import com.ribeira.inventory.application.StockLedger;
@@ -20,6 +21,7 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -162,6 +164,16 @@ public class DonationService {
     return DonationView.of(donation);
   }
 
+  /** Aggregates for reports; the caller restricts communities to authorized ones. */
+  @Transactional(readOnly = true)
+  public DonationStats stats(Collection<UUID> communityIds, Instant from, Instant to) {
+    if (communityIds.isEmpty()) {
+      return new DonationStats(0, List.of());
+    }
+    return new DonationStats(
+        donations.countIn(communityIds, from, to), donations.totalsByFood(communityIds, from, to));
+  }
+
   private static void requireSplitMatchesItem(ReceiveDonation.Item item) {
     BigDecimal total =
         item.batches().stream()
@@ -187,6 +199,8 @@ public class DonationService {
       }
     }
   }
+
+  public record DonationStats(long donations, List<QuantityByFood> totalsByFood) {}
 
   public record DonationReceipt(DonationView donation, List<BatchView> batches) {}
 }
