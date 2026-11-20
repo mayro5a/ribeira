@@ -82,6 +82,36 @@ public class Fixtures {
     return new TestUser(id, organizationId, email);
   }
 
+  public UUID food(UUID organizationId, String unit) {
+    UUID id = UUID.randomUUID();
+    Timestamp now = Timestamp.from(Instant.now());
+    jdbc.update(
+        "INSERT INTO foods (id, organization_id, name, category, unit, created_at, updated_at)"
+            + " VALUES (?, ?, ?, 'GRAINS_AND_CEREALS', ?, ?, ?)",
+        id,
+        organizationId,
+        "Alimento " + id,
+        unit,
+        now,
+        now);
+    return id;
+  }
+
+  public UUID storageLocation(UUID organizationId, UUID communityId) {
+    UUID id = UUID.randomUUID();
+    Timestamp now = Timestamp.from(Instant.now());
+    jdbc.update(
+        "INSERT INTO storage_locations (id, organization_id, community_id, name, created_at,"
+            + " updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+        id,
+        organizationId,
+        communityId,
+        "Depósito " + id,
+        now,
+        now);
+    return id;
+  }
+
   public TestUser admin(UUID organizationId) {
     return user(organizationId, ORG_ADMIN, Map.of());
   }
