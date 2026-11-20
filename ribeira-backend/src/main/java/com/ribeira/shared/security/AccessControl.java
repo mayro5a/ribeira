@@ -66,6 +66,12 @@ public class AccessControl {
     return grants;
   }
 
+  /** Any active member of the organization (e.g. reading the food catalog). */
+  public Actor member() {
+    grants();
+    return actor();
+  }
+
   /** For organization-level actions (manage users, communities, catalogs). */
   public Actor requireOrganization(Permission permission) {
     AccessGrants grants = grants();
