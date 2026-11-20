@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Ribeira">
+  <rect width="512" height="512" rx="112" fill="#0b5661"/>
+  <path d="M256 92c-58 70-94 122-94 170a94 94 0 0 0 188 0c0-48-36-100-94-170z" fill="#d4ecef"/>
+  <path d="M96 352c40-24 80-24 120 0s80 24 120 0 80-24 120 0" fill="none" stroke="#ffffff" stroke-width="28" stroke-linecap="round"/>
+  <path d="M96 420c40-24 80-24 120 0s80 24 120 0 80-24 120 0" fill="none" stroke="#7cc3cc" stroke-width="28" stroke-linecap="round"/>
+</svg>
